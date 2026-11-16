@@ -41,19 +41,19 @@ const Snd = (() => {
   // a wooden piece set down on a wooden block
   const clack = (t = 0, g = 0.5, f = 620) => { tone({ t, f, f2: f * 0.55, dur: 0.07, g, type: 'triangle' }); tone({ t, f: f * 2.4, dur: 0.03, g: g * 0.35 }); noise({ t, f: 2600, dur: 0.035, g: g * 0.4, q: 1.2 }); };
   const fx = {
-    tap() { clack(0, 0.16, 900); },
-    pick() { clack(0, 0.2, 760); clack(0.06, 0.16, 1010); },
+    tap() { tone({ f: 880, dur: 0.05, type: 'square', g: 0.07, lp: 2400 }); },
+    pick() { tone({ f: 660, dur: 0.05, type: 'square', g: 0.07, lp: 2400 }); tone({ f: 990, t: 0.05, dur: 0.07, type: 'square', g: 0.07, lp: 2400 }); },
     nope() { tone({ f: 170, dur: 0.12, type: 'square', g: 0.06, lp: 600 }); },
-    step() { clack(0, 0.34, 560 + Math.random() * 120); },
+    step() { noise({ f: 420, dur: 0.05, g: 0.16, type: 'lowpass' }); tone({ f: 160, f2: 90, dur: 0.05, g: 0.12 }); },
     whoosh() { noise({ f: 500, f2: 2600, dur: 0.2, g: 0.13, q: 1.4 }); },
     arrow() { noise({ f: 1800, f2: 4200, dur: 0.16, g: 0.12, q: 2 }); },
     thock() { clack(0, 0.4, 420); tone({ f: 150, f2: 70, dur: 0.12, g: 0.3 }); },
-    hit(big) { clack(0, big ? 0.6 : 0.45, big ? 300 : 380); tone({ f: big ? 150 : 190, f2: 55, dur: big ? 0.24 : 0.15, g: big ? 0.45 : 0.3 }); if (big) tone({ f: 1900, dur: 0.18, g: 0.05, type: 'triangle' }); },
+    hit(big) { noise({ f: big ? 900 : 1300, f2: 300, dur: big ? 0.16 : 0.1, g: big ? 0.4 : 0.3, q: 0.7 }); tone({ f: big ? 150 : 190, f2: 55, dur: big ? 0.24 : 0.15, g: big ? 0.45 : 0.3 }); },
     fire() { noise({ f: 300, f2: 1800, dur: 0.5, g: 0.36, type: 'lowpass', a: 0.02 }); tone({ f: 100, f2: 42, dur: 0.45, g: 0.4 }); },
     spark() { noise({ f: 2400, f2: 600, dur: 0.18, g: 0.2 }); tone({ f: 900, f2: 300, dur: 0.14, g: 0.12, type: 'triangle' }); },
     heal() { [76, 79, 84, 88].forEach((m, i) => tone({ f: mtof(m), t: i * 0.07, dur: 0.4, g: 0.11, echo: true })); },
-    topple() { clack(0, 0.5, 330); clack(0.13, 0.4, 260); clack(0.22, 0.25, 300); },
-    aside() { clack(0, 0.3, 480); },
+    topple() { tone({ f: 420, f2: 60, dur: 0.4, g: 0.26, type: 'square', lp: 1400 }); noise({ t: 0.22, f: 300, dur: 0.12, g: 0.2, type: 'lowpass' }); },
+    turn() { noise({ f: 700, f2: 1500, dur: 0.16, g: 0.1, q: 1.2 }); },
     win() { [72, 76, 79, 84, 88, 91].forEach((m, i) => tone({ f: mtof(m), t: i * 0.12, dur: 0.6, g: 0.15, echo: true })); },
     lose() { [69, 65, 62, 57].forEach((m, i) => tone({ f: mtof(m), t: i * 0.24, dur: 0.8, g: 0.15, type: 'triangle', lp: 1200 })); },
   };
@@ -64,7 +64,7 @@ const Snd = (() => {
     { pad: [55, 60, 64], bass: 48, arp: [67, 72, 76, 72, 67, 72, 76, 79], mel: [[0, 79], [2, 76], [4, 72]] },
     { pad: [55, 59, 62], bass: 43, arp: [67, 71, 74, 71, 67, 71, 74, 79], mel: [[0, 74], [3, 79], [6, 83]] },
   ];
-  const box = (t, m, g) => { tone({ at: t, f: mtof(m), dur: 0.9, g, dest: music, echo: true }); tone({ at: t, f: mtof(m) * 3.01, dur: 0.12, g: g * 0.25, dest: music }); };
+  const box = (t, m, g) => { tone({ at: t, f: mtof(m), dur: 0.5, g, dest: music, echo: true, type: 'triangle' }); tone({ at: t, f: mtof(m), dur: 0.16, g: g * 0.3, dest: music, type: 'square', lp: 1800 }); };
   function schedule() {
     if (!ac) return;
     while (nextT < ac.currentTime + 0.25) {

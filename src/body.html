@@ -1,58 +1,56 @@
 <div id="app">
-  <canvas id="cv" layoutsubtree content="drawable" aria-label="The game board"></canvas>
+  <canvas id="cv" aria-label="The battle map"></canvas>
   <div id="labels" aria-hidden="true"></div>
 
   <header id="top" class="gutter">
     <div id="order" aria-label="Turn order"></div>
-    <button id="bSnd" class="ic" aria-label="Sound on or off"></button>
-    <button id="bHelp" class="ic" aria-label="How to play">?</button>
+    <button id="bTurn" class="ic win" aria-label="Turn the map"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" d="M19 12a7 7 0 1 1-2-5.300"/><path fill="currentColor" d="M20 2v6h-6z"/></svg></button>
+    <button id="bSnd" class="ic win" aria-label="Sound on or off"></button>
+    <button id="bHelp" class="ic win" aria-label="How to play">?</button>
   </header>
   <div id="banner" aria-live="polite"></div>
 
-  <section id="hud" aria-label="Selected piece">
-    <div class="frame">
-      <div id="card">
-        <img id="uPic" alt="">
-        <div id="cardMain">
-          <div id="cardTop"><span id="uName"></span><span id="uCls"></span><span id="hpTxt"></span></div>
-          <div id="hpBar"><div id="hpFill"></div></div>
-          <div id="uStats"></div>
-        </div>
+  <section id="hud" class="win" aria-label="Selected unit">
+    <div id="card">
+      <div id="uPicBox"><img id="uPic" alt=""></div>
+      <div id="cardMain">
+        <div id="cardTop"><span id="uName"></span><span id="uCls"></span><span id="hpTxt"></span></div>
+        <div id="hpBar"><div id="hpFill"></div></div>
+        <div id="uStats"></div>
       </div>
-      <div id="hint" aria-live="polite"></div>
-      <div class="row" id="actRow">
-        <button id="bAtk"><b></b><small></small></button>
-        <button id="bSkl"><b></b><small></small></button>
-        <button id="bUndo" class="minor"><b>Undo move</b></button>
-        <button id="bEnd" class="minor"><b>End turn</b></button>
-      </div>
-      <div class="row" id="confRow" hidden>
-        <button id="bCancel" class="minor"><b>Cancel</b></button>
-        <button id="bOk" class="primary"><b>Confirm</b><small>or tap the target again</small></button>
-      </div>
+    </div>
+    <div id="hint" aria-live="polite"></div>
+    <div class="row" id="actRow">
+      <button id="bAtk"><b></b><small></small></button>
+      <button id="bSkl"><b></b><small></small></button>
+      <button id="bUndo" class="minor"><b>Undo move</b></button>
+      <button id="bEnd" class="minor"><b>End turn</b></button>
+    </div>
+    <div class="row" id="confRow" hidden>
+      <button id="bCancel" class="minor"><b>Cancel</b></button>
+      <button id="bOk" class="primary"><b>Confirm</b><small>or tap the target again</small></button>
     </div>
   </section>
 
   <div class="overlay gutter" id="intro">
     <div class="titleblock">
-      <div class="eyebrow">Level 1 · Alder Ford</div>
+      <div class="eyebrow">Chapter 1 · Alder Ford</div>
       <h1>Boxwood Tactics</h1>
     </div>
-    <div class="sheet">
-      <p>The Ebony company holds the far bank. Take all five of their pieces off the board.</p>
+    <div class="sheet win">
+      <p>The Crow Banner holds the far bank. Rout all five of them.</p>
       <ul class="tips">
-        <li>Each piece may <b>move</b> and <b>act</b> once per turn, in either order.</li>
+        <li>Each unit may <b>move</b> and <b>act</b> once per turn, in either order.</li>
         <li><b>High ground</b> adds damage to arrows and spells.</li>
         <li>A blow <b>from behind</b> deals half again as much.</li>
-        <li>Drag to turn the table. Pinch to zoom.</li>
+        <li>Swipe sideways to turn the map.</li>
       </ul>
-      <label id="hicRow" hidden><input type="checkbox" id="hicToggle"> Draw the card inside the 3D scene (HTML-in-Canvas)</label>
-      <button class="go" id="startBtn"><b>Set the board</b></button>
+      <button class="go" id="startBtn"><b>Begin</b></button>
     </div>
   </div>
 
   <div class="overlay gutter" id="outro" hidden>
-    <div class="sheet">
+    <div class="sheet win">
       <div class="eyebrow" id="outroEyebrow"></div>
       <h2 id="outroTitle"></h2>
       <div id="stars" aria-hidden="true"></div>

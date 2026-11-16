@@ -1,4 +1,4 @@
-/* ===== data: the board, the Boxwood set, the Ebony set ===== */
+/* ===== data: the map, the Boxwood Company, the Crow Banner ===== */
 const W = 8, H = 8;
 const HEIGHTS = [
   [2, 2, 1, 1, 1, 2, 3, 3],
@@ -32,9 +32,9 @@ const TYPES = {
   archer:  { name: 'Wren',  cls: 'Archer', team: 'crew', hp: 26, move: 4, jump: 3, speed: 9, ab: ['shoot', 'power'], blurb: 'Long reach. Deadlier from high ground.' },
   mage:    { name: 'Ember', cls: 'Mage',   team: 'crew', hp: 22, move: 3, jump: 2, speed: 8, ab: ['spark', 'fireball'], blurb: 'Fragile. Burns several enemies at once.' },
   cleric:  { name: 'Hale',  cls: 'Cleric', team: 'crew', hp: 28, move: 4, jump: 2, speed: 8, ab: ['mace', 'mend'], blurb: 'Keeps everyone standing.' },
-  raider:  { name: 'Raider',  cls: 'Ebony footman', team: 'foe', hp: 20, move: 4, jump: 2, speed: 8, ab: ['axe'] },
-  bowman:  { name: 'Bowman',  cls: 'Ebony archer',  team: 'foe', hp: 14, move: 3, jump: 2, speed: 7, ab: ['bow'] },
-  captain: { name: 'Captain', cls: 'Ebony commander', team: 'foe', hp: 40, move: 3, jump: 2, speed: 6, ab: ['great'], boss: true },
+  raider:  { name: 'Raider',  cls: 'Crow Banner footman', team: 'foe', hp: 20, move: 4, jump: 2, speed: 8, ab: ['axe'] },
+  bowman:  { name: 'Bowman',  cls: 'Crow Banner archer',  team: 'foe', hp: 14, move: 3, jump: 2, speed: 7, ab: ['bow'] },
+  captain: { name: 'Captain', cls: 'Crow Banner captain', team: 'foe', hp: 40, move: 3, jump: 2, speed: 6, ab: ['great'], boss: true },
 };
 const START = {
   crew: [['knight', 3, 5], ['archer', 1, 6], ['mage', 4, 5], ['cleric', 3, 6]],
