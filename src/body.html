@@ -1,54 +1,53 @@
 <div id="app">
+  <canvas id="cv" layoutsubtree content="drawable" aria-label="The game board"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+
   <header id="top" class="gutter">
     <div id="order" aria-label="Turn order"></div>
     <button id="bSnd" class="ic" aria-label="Sound on or off"></button>
     <button id="bHelp" class="ic" aria-label="How to play">?</button>
   </header>
+  <div id="banner" aria-live="polite"></div>
 
-  <div id="stage">
-    <canvas id="cv"></canvas>
-    <div id="shelf" class="gutter"><span>Bottled</span><span id="pips"></span></div>
-    <div id="banner" aria-live="polite"></div>
-  </div>
-
-  <footer id="hud" class="gutter">
-    <div id="card">
-      <img id="uPic" alt="">
-      <div id="cardMain">
-        <div id="cardTop"><span id="uName"></span><span id="uCls"></span><span id="uStats"></span></div>
-        <div id="hpRow"><div id="hpBar"><div id="hpFill"></div></div><span id="hpTxt"></span></div>
-        <div id="uInfo"></div>
+  <section id="hud" aria-label="Selected piece">
+    <div class="frame">
+      <div id="card">
+        <img id="uPic" alt="">
+        <div id="cardMain">
+          <div id="cardTop"><span id="uName"></span><span id="uCls"></span><span id="hpTxt"></span></div>
+          <div id="hpBar"><div id="hpFill"></div></div>
+          <div id="uStats"></div>
+        </div>
+      </div>
+      <div id="hint" aria-live="polite"></div>
+      <div class="row" id="actRow">
+        <button id="bAtk"><b></b><small></small></button>
+        <button id="bSkl"><b></b><small></small></button>
+        <button id="bUndo" class="minor"><b>Undo move</b></button>
+        <button id="bEnd" class="minor"><b>End turn</b></button>
+      </div>
+      <div class="row" id="confRow" hidden>
+        <button id="bCancel" class="minor"><b>Cancel</b></button>
+        <button id="bOk" class="primary"><b>Confirm</b><small>or tap the target again</small></button>
       </div>
     </div>
-    <div id="hint" aria-live="polite"></div>
-    <div class="row" id="actRow">
-      <button id="bMove"><b>Move</b><small></small></button>
-      <button id="bEnd"><b>End turn</b><small>then pick a facing</small></button>
-      <button id="bAtk"><b></b><small></small></button>
-      <button id="bSkl"><b></b><small></small></button>
-    </div>
-    <div class="row" id="confRow" hidden>
-      <button id="bCancel"><b>Cancel</b><small>pick something else</small></button>
-      <button id="bOk" class="primary"><b>Confirm</b><small>or tap the target again</small></button>
-    </div>
-    <div class="row" id="faceRow" hidden>
-      <button id="bBack"><b>Back</b><small>not done yet</small></button>
-      <button id="bFace" class="primary"><b>Done</b><small>keep the suggested facing</small></button>
-    </div>
-  </footer>
+  </section>
 
   <div class="overlay gutter" id="intro">
+    <div class="titleblock">
+      <div class="eyebrow">Level 1 · Alder Ford</div>
+      <h1>Boxwood Tactics</h1>
+    </div>
     <div class="sheet">
-      <div class="eyebrow">Level 1 · The Last Word, 2 a.m.</div>
-      <h2>Last Call Tactics</h2>
-      <p>The bottles on the back bar have started to rattle. Every spirit in the house wants out, and the closing crew is all that stands between them and the street. Put them back.</p>
-      <div id="crewList"></div>
+      <p>The Ebony company holds the far bank. Take all five of their pieces off the board.</p>
       <ul class="tips">
-        <li><b>Soak, then light.</b> Soaked targets take double from fire and flare onto whoever is next to them. That includes your crew.</li>
-        <li><b>Use the room.</b> Shove spirits off the bar, into walls, into each other, or into a keg.</li>
-        <li><b>Mind your back.</b> Hits from behind deal +50%. You choose a facing when a turn ends.</li>
+        <li>Each piece may <b>move</b> and <b>act</b> once per turn, in either order.</li>
+        <li><b>High ground</b> adds damage to arrows and spells.</li>
+        <li>A blow <b>from behind</b> deals half again as much.</li>
+        <li>Drag to turn the table. Pinch to zoom.</li>
       </ul>
-      <button class="primary" id="startBtn"><b>Lock the doors</b></button>
+      <label id="hicRow" hidden><input type="checkbox" id="hicToggle"> Draw the card inside the 3D scene (HTML-in-Canvas)</label>
+      <button class="go" id="startBtn"><b>Set the board</b></button>
     </div>
   </div>
 
@@ -59,7 +58,7 @@
       <div id="stars" aria-hidden="true"></div>
       <p id="outroText"></p>
       <div id="stats"></div>
-      <button class="primary" id="againBtn"><b>Play again</b></button>
+      <button class="go" id="againBtn"><b>Play again</b></button>
     </div>
   </div>
 </div>
