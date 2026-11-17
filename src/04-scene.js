@@ -1,7 +1,8 @@
 /* ===== the diorama, 32-bit style: low-resolution render, orthographic camera, sprite characters ===== */
 const $ = id => document.getElementById(id);
 const canvas = $('cv');
-const STEP = 0.5, BOTTOM = -1.5, OFFX = (W - 1) / 2, OFFZ = (H - 1) / 2, ELEV = Math.PI / 6;   // 30 degrees gives 2:1 tiles
+const STEP = 0.5, BOTTOM = -1.5, ELEV = Math.PI / 6;   // 30 degrees gives 2:1 tiles
+let OFFX = (W - 1) / 2, OFFZ = (H - 1) / 2;
 const topY = (x, y) => kindAt(x, y) === 'w' ? -0.14 : kindAt(x, y) === 'f' ? -0.06 : hAt(x, y) * STEP;
 const tileV = (x, y, up = 0) => new THREE.Vector3(x - OFFX, topY(x, y) + up, y - OFFZ);
 const lerp = (a, b, k) => a + (b - a) * k, easeOut = k => 1 - Math.pow(1 - k, 3), easeIO = k => k * k * (3 - 2 * k), rnd = (a, b) => a + Math.random() * (b - a);
@@ -30,6 +31,7 @@ const dashTex = tex(pxCanvas(16, 16, g => { g.fillStyle = 'rgba(255,255,255,.12)
 const cornerTex = tex(pxCanvas(16, 16, g => { g.fillStyle = '#fff'; for (const [x, y] of [[0, 0], [11, 0], [0, 11], [11, 11]]) { g.fillRect(x, y === 0 ? 0 : 15, 5, 1); g.fillRect(x === 0 ? 0 : 15, y, 1, 5); } }));
 const blobTex = tex(pxCanvas(16, 16, g => { g.fillStyle = 'rgba(8,8,24,.42)'; g.beginPath(); g.arc(8, 8, 6.5, 0, 7); g.fill(); }));
 const glowTex = tex(pxCanvas(32, 32, g => { const rg = g.createRadialGradient(16, 16, 0, 16, 16, 16); rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(0.45, 'rgba(255,255,255,.4)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = rg; g.fillRect(0, 0, 32, 32); }));
+const stillTex = tex(pxCanvas(7, 9, g => { g.fillStyle = OUTL; g.fillRect(0, 0, 7, 9); g.fillStyle = '#bfe6ff'; g.fillRect(1, 1, 5, 1); g.fillRect(1, 7, 5, 1); g.fillRect(2, 2, 3, 1); g.fillRect(3, 3, 1, 3); g.fillRect(2, 6, 3, 1); g.fillStyle = '#5aa8ff'; g.fillRect(2, 6, 3, 1); g.fillRect(3, 5, 1, 1); }));
 const arrowTex = tex(pxCanvas(9, 8, g => { g.fillStyle = OUTL; g.fillRect(0, 0, 9, 4); g.fillRect(1, 4, 7, 2); g.fillRect(3, 6, 3, 2); g.fillStyle = '#ffd24a'; g.fillRect(1, 1, 7, 2); g.fillRect(2, 3, 5, 1); g.fillRect(3, 4, 3, 1); g.fillRect(4, 5, 1, 2); g.fillStyle = '#fff3b0'; g.fillRect(1, 1, 7, 1); }));
 
 /* --- backdrop: a dithered dusk gradient, like the void those old maps floated in --- */
@@ -48,21 +50,28 @@ const postMat = new THREE.ShaderMaterial({ uniforms: { tD: { value: null }, uFla
   fragmentShader: 'precision highp float; varying vec2 vUv; uniform sampler2D tD; uniform vec3 uFlash; void main(){ gl_FragColor = vec4(texture2D(tD, vUv).rgb + uFlash * .3, 1.); }' });
 postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMat));
 
-/* --- terrain: one box per tile, turf on top, cliff on the sides --- */
-const tileMeshes = [], decals = [];
+/* --- terrain: one box per tile, turf on top, cliff on the sides. Rebuilt for each chapter. --- */
+const tileMeshes = [], decals = [], levelObjs = [], levelTex = [];
 const waterTex = tex(tileTop('w', 11), true);
 const SHADE = [0.8, 0.95, 1, 0.3, 0.64, 0.86];   // +x, -x, top, bottom, +z, -z
-for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-  const k = kindAt(x, y), ty = topY(x, y), hgt = ty - BOTTOM, rows = Math.round(hgt * 16), sk = k + rows;
-  const sideTex = mat('st' + sk, () => tex(tileSide(k, rows, rows * 7 + k.charCodeAt(0))));
-  const side = i => mat('sm' + sk + i, () => basic({ map: sideTex, color: new THREE.Color().setScalar(SHADE[i]) }));
-  const lift = k === 'w' ? 1 : 0.9 + hAt(x, y) * 0.035;
-  const top = basic({ map: k === 'w' ? waterTex : tex(tileTop(k, x * 31 + y * 17 + 3)), color: new THREE.Color().setScalar(lift) });
-  const m = new THREE.Mesh(new THREE.BoxGeometry(1, hgt, 1), [side(0), side(1), top, mat('under', () => basic({ color: '#0b0e28' })), side(4), side(5)]);
-  m.position.set(x - OFFX, ty - hgt / 2, y - OFFZ); m.userData.tile = { x, y }; scene.add(m); tileMeshes.push(m);
-  const d = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), basic({ map: fillTex, transparent: true, depthWrite: false, opacity: 0 }));
-  d.rotation.x = -Math.PI / 2; d.position.set(x - OFFX, ty + 0.012, y - OFFZ); d.visible = false; d.renderOrder = 2; scene.add(d); decals[y * W + x] = d;
+function buildLevel() {
+  for (const o of levelObjs) scene.remove(o); for (const t of levelTex) t.dispose(); for (const b of propBoards) dropBoard(b);
+  levelObjs.length = levelTex.length = propBoards.length = tileMeshes.length = decals.length = 0;
+  OFFX = (W - 1) / 2; OFFZ = (H - 1) / 2;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const k = kindAt(x, y), ty = topY(x, y), hgt = ty - BOTTOM, rows = Math.round(hgt * 16), sk = k + rows;
+    const sideTex = mat('st' + sk, () => tex(tileSide(k, rows, rows * 7 + k.charCodeAt(0))));
+    const side = i => mat('sm' + sk + i, () => basic({ map: sideTex, color: new THREE.Color().setScalar(SHADE[i]) }));
+    const lift = k === 'w' ? 1 : 0.9 + hAt(x, y) * 0.035, tt = k === 'w' ? waterTex : tex(tileTop(k, x * 31 + y * 17 + 3)); if (k !== 'w') levelTex.push(tt);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(1, hgt, 1), [side(0), side(1), basic({ map: tt, color: new THREE.Color().setScalar(lift) }), mat('under', () => basic({ color: '#0b0e28' })), side(4), side(5)]);
+    m.position.set(x - OFFX, ty - hgt / 2, y - OFFZ); m.userData.tile = { x, y }; scene.add(m); tileMeshes.push(m); levelObjs.push(m);
+    const d = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), basic({ map: fillTex, transparent: true, depthWrite: false, opacity: 0 }));
+    d.rotation.x = -Math.PI / 2; d.position.set(x - OFFX, ty + 0.012, y - OFFZ); d.visible = false; d.renderOrder = 2; scene.add(d); decals[y * W + x] = d; levelObjs.push(d);
+  }
+  for (const k in PROPS) { const [x, y] = k.split(',').map(Number); addProp(PROPS[k], x, y); }
 }
+const propBoards = [], PROP_ART = { tree: (x, y) => drawTree(x * 7 + y), rock: drawRock, house: (x, y) => drawHouse(x + y), bell: drawBell, pillar: drawPillar, table: drawTable };
+function addProp(kind, x, y) { const c = PROP_ART[kind](x, y), b = board(tex(c), c.width, c.height); b.userData.anchor.copy(tileV(x, y)); propBoards.push(b); return b; }
 const DECAL = { move: ['#3f7bff', 0.9], range: ['#ffb02e', 0.95, 1], hot: ['#ff3d3d', 1], area: ['#ffe14a', 1], threat: ['#c06bff', 0.95, 1] };   // third value: dashed outline instead of a filled tile
 function setDecals(fn) {
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -92,41 +101,42 @@ function placeBoards() {
     m.position.addScaledVector(camRight, ox / view.ppu).addScaledVector(camUp, -oy / view.ppu);
   }
 }
-for (const k in PROPS) { const [x, y] = k.split(',').map(Number), tree = PROPS[k] === 'tree', c = tree ? drawTree(x * 7 + y) : drawRock(), b = board(tex(c), c.width, c.height); b.userData.anchor.copy(tileV(x, y)); }
 const cursorArrow = board(arrowTex, 9, 8, { lift: 0.6 }); cursorArrow.visible = false; cursorArrow.renderOrder = 5;
 
 /* --- units --- */
 const ATLAS = {}; for (const t in KIT) { const a = spriteAtlas(t); ATLAS[t] = { tex: tex(a.atlas), white: tex(a.white), canvas: a.atlas }; }
-const pieceProxies = [];
+const pieceProxies = [], stageUnits = [];   // stageUnits: characters who stand in a scene without being in the battle
 function setFrame(u, f, mirror) {
   if (u.frame === f && u.mir === mirror) return; u.frame = f; u.mir = mirror;
   const uv = u.sprite.geometry.attributes.uv, u0 = f / 4, u1 = (f + 1) / 4, a = mirror ? u1 : u0, b = mirror ? u0 : u1;
   uv.setXY(0, a, 1); uv.setXY(1, b, 1); uv.setXY(2, a, 0); uv.setXY(3, b, 0); uv.needsUpdate = true;
 }
 function initDisplay(u) {
-  if (u.sprite) { dropBoard(u.sprite); scene.remove(u.shadow); }
+  dropUnit(u);
   u.sprite = board(ATLAS[u.type].tex, SW, SH); u.sprite.material = basic({ map: ATLAS[u.type].tex, alphaTest: 0.5 }); u.sprite.userData.unit = u; pieceProxies.push(u.sprite);
-  u.pos = tileV(u.x, u.y); u.sprite.userData.anchor = u.pos; u.groundY = u.pos.y; u.frame = -1; u.shp = u.hp; u.gone = false; u.stepping = false; u.spin = 0;
+  u.icon = board(stillTex, 7, 9, { lift: 0.5 }); u.icon.visible = false; u.icon.renderOrder = 5; u.dStill = !!u.stilled;
+  u.pos = tileV(u.x, u.y); u.sprite.userData.anchor = u.pos; u.icon.userData.anchor = u.pos; u.icon.userData.sx = 9; u.icon.userData.sy = -(SH - 6); u.groundY = u.pos.y; u.frame = -1; u.shp = u.hp; u.gone = false; u.stepping = false; u.spin = 0;
   u.shadow = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.7), mat('blob', () => basic({ map: blobTex, transparent: true, depthWrite: false }))); u.shadow.rotation.x = -Math.PI / 2; u.shadow.renderOrder = 1; scene.add(u.shadow);
 }
-function clearPieces() { for (const u of G.units) if (u.sprite) { dropBoard(u.sprite); scene.remove(u.shadow); } pieceProxies.length = 0; }
-function syncDisplay() { for (const u of G.units) { if (u.dead) { if (!u.gone) { u.gone = true; u.sprite.visible = false; u.shadow.visible = false; } continue; } u.pos.copy(tileV(u.x, u.y)); u.groundY = u.pos.y; u.shp = u.hp; u.sprite.userData.sx = 0; u.sprite.userData.roll = 0; } }
+function dropUnit(u) { if (u.sprite) { const i = pieceProxies.indexOf(u.sprite); if (i >= 0) pieceProxies.splice(i, 1); dropBoard(u.sprite); dropBoard(u.icon); scene.remove(u.shadow); u.sprite = null; } }
+function clearPieces() { for (const u of G.units) dropUnit(u); pieceProxies.length = 0; }
+function syncDisplay() { for (const u of G.units) { if (!u.sprite) continue; if (u.dead) { if (!u.gone) { u.gone = true; u.sprite.visible = false; u.shadow.visible = false; } u.icon.visible = false; continue; } u.pos.copy(tileV(u.x, u.y)); u.groundY = u.pos.y; u.shp = u.hp; u.dStill = u.stilled; u.sprite.userData.sx = 0; u.sprite.userData.roll = 0; } }
 function flashPiece(u, ms = 110) { if (G.fast) return; u.sprite.material.map = ATLAS[u.type].white; setTimeout(() => { u.sprite.material.map = ATLAS[u.type].tex; }, ms); }
 function updateUnits(now) {
   const fx = Math.sin(view.yaw), fz = Math.cos(view.yaw);   // from the board toward the camera, on the ground
-  for (const u of G.units) {
+  for (const u of G.units.concat(stageUnits)) {
     if (!u.sprite || u.gone) continue;
     const f = u.spin ? (u.facing + u.spin) % 4 : u.facing, dx = DX[f], dz = DY[f];
     const front = dx * fx + dz * fz > 0, right = dx * fz - dz * fx > 0;   // art is drawn facing screen-left
     const beat = u.stepping ? 130 : 540, idle = Math.floor(now / beat + u.id * 0.37) % 2;
     setFrame(u, (front ? 0 : 2) + idle, right);
-    u.shadow.position.set(u.pos.x, u.groundY + 0.014, u.pos.z);
+    u.shadow.position.set(u.pos.x, u.groundY + 0.014, u.pos.z); u.icon.visible = !!u.dStill && u.sprite.visible;
   }
 }
 
 /* --- effects --- */
 const partGeo = new THREE.BoxGeometry(1, 1, 1), parts = [];
-const partMat = { hit: basic({ color: '#fff6c8' }), dark: basic({ color: '#ffd9a0' }), spark: basic({ color: '#ffb347' }), heal: basic({ color: '#9df0a5' }), white: basic({ color: '#ffffff' }) };
+const partMat = { hit: basic({ color: '#fff6c8' }), dark: basic({ color: '#ffd9a0' }), spark: basic({ color: '#ffb347' }), heal: basic({ color: '#9df0a5' }), white: basic({ color: '#ffffff' }), frost: basic({ color: '#bfe6ff' }), gold: basic({ color: '#ffd24a' }) };
 function burst(pos, kind, n, speed = 2.6) {
   if (G.fast) return;
   for (let i = 0; i < n; i++) {
@@ -146,12 +156,12 @@ const arrowMesh = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.55), basic(
 const orbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), basic({ color: '#ffe2a8' })); orbMesh.visible = false; scene.add(orbMesh);
 async function projectile(kind, from, to, ms, arc) {
   if (G.fast) return;
-  const arrow = kind === 'arrow', obj = arrow ? arrowMesh : orbMesh, col = kind === 'heal' ? '#8df0a0' : '#ffb060';
-  obj.visible = true; if (!arrow) { orbMesh.material.color.set(kind === 'heal' ? '#e2ffe4' : '#fff0c0'); orbMesh.scale.setScalar(kind === 'fireball' ? 1.8 : 1); glowSprite.visible = true; glowSprite.material.color.set(col); glowSprite.scale.setScalar(kind === 'fireball' ? 1.5 : 0.9); }
+  const arrow = kind === 'arrow', obj = arrow ? arrowMesh : orbMesh, col = kind === 'heal' ? '#8df0a0' : kind === 'frost' ? '#7fc8ff' : kind === 'chime' ? '#ffd24a' : '#ffb060';
+  obj.visible = true; if (!arrow) { orbMesh.material.color.set(kind === 'heal' ? '#e2ffe4' : kind === 'frost' ? '#e6f6ff' : '#fff0c0'); orbMesh.scale.setScalar(kind === 'fireball' ? 1.8 : 1); glowSprite.visible = true; glowSprite.material.color.set(col); glowSprite.scale.setScalar(kind === 'fireball' ? 1.5 : 0.9); }
   const prev = from.clone();
   await tween(ms, k => {
     const p = from.clone().lerp(to, k); p.y += Math.sin(Math.PI * k) * arc; obj.position.copy(p);
-    if (arrow) obj.lookAt(p.clone().add(p.clone().sub(prev).normalize())); else { glowSprite.position.copy(p); if (Math.random() < 0.7) burst(p, kind === 'heal' ? 'heal' : 'spark', 1, 0.5); }
+    if (arrow) obj.lookAt(p.clone().add(p.clone().sub(prev).normalize())); else { glowSprite.position.copy(p); if (Math.random() < 0.7) burst(p, kind === 'heal' ? 'heal' : kind === 'frost' ? 'frost' : kind === 'chime' ? 'gold' : 'spark', 1, 0.5); }
     prev.copy(p);
   });
   obj.visible = false; glowSprite.visible = false;
@@ -169,7 +179,7 @@ function resize() {
   rt = new THREE.WebGLRenderTarget(view.gw, view.gh, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter }); rt.texture.encoding = THREE.sRGBEncoding;
   postMat.uniforms.tD.value = rt.texture; bgScene.children[0].material.uniforms.uRes.value.set(view.gw, view.gh);
   const hudPx = view.hudH / view.css, topPx = view.topH / view.css, avail = Math.max(120, view.gh - hudPx - topPx);
-  const tw = Math.max(16, 2 * Math.floor(Math.min((view.gw - 4) / 16, (avail - 30) / 11.6)));   // tile width in game pixels; the board is 8 tiles wide on screen
+  const span = W + H, tw = Math.max(16, 2 * Math.floor(Math.min((view.gw - 4) / span, (avail - 30) / (span * 0.725))));   // tile width in game pixels; the board is (W+H)/2 tiles wide on screen
   view.ppu = tw / Math.SQRT2; view.shiftPx = Math.round(view.gh / 2 - (topPx + avail * 0.56));
   cam.left = -view.gw / 2 / view.ppu; cam.right = -cam.left; cam.top = view.gh / 2 / view.ppu; cam.bottom = -cam.top; cam.updateProjectionMatrix();
   if (typeof onResize === 'function') onResize();

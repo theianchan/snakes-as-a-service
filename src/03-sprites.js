@@ -28,6 +28,14 @@ const KIT = {
   cleric:  { skin: SKIN.light, hair: ['#e8c96a', '#c29a3e'], cloth: ['#f1ede2', '#c4bcab', '#ffffff'], robe: true, trim: GOLD[0], belt: '#3f6fd8', head: 'coif', gear: 'mace' },
   raider:  { skin: SKIN.tan, hair: ['#35303b', '#221f27'], cloth: ['#7a543e', '#59392a', '#9a705a'], sleeve: SKIN.tan, legs: ['#45414f', '#2f2c38'], boot: ['#3a2a22', '#2a1d18'], belt: '#221f27', head: 'bandana', accent: ['#d23b30', '#9c2420'], gear: 'axe' },
   bowman:  { skin: SKIN.light, hair: ['#35303b', '#221f27'], cloth: ['#9a3330', '#6f2023', '#c2524a'], legs: ['#45414f', '#2f2c38'], boot: ['#3a2a22', '#2a1d18'], belt: '#221f27', head: 'mask', gear: 'bow' },
+  scout:   { skin: ['#c98a5e', '#a56a42'], hair: ['#a8452a', '#7d2f1c'], cloth: ['#2f8f8a', '#1f6a68', '#55b8b0'], legs: ['#5a4a3c', '#40342a'], boot: ['#3a2a22', '#2a1d18'], belt: '#40342a', head: 'hair', scarf: ['#f0a030', '#c27a1c'], gear: 'dagger' },
+  warden:  { skin: SKIN.pale, hair: ['#55506a', '#3d394f'], cloth: ['#7f8aa8', '#5c6684', '#a8b2cc'], robe: true, trim: '#c9d2e3', belt: '#3d394f', head: 'hood', plain: true, gear: 'halberd' },
+  chimer:  { skin: SKIN.light, hair: ['#55506a', '#3d394f'], cloth: ['#d9d4c4', '#aea896', '#f6f2e6'], robe: true, trim: GOLD[0], belt: '#7f8aa8', head: 'hood', plain: true, gear: 'bell' },
+  larkblade: { skin: SKIN.light, hair: ['#8a5a2b', '#6b431f'], cloth: ['#e0b02e', '#b08420', '#f6d266'], sleeve: [STEEL[0], STEEL[1]], legs: ['#7c88a3', '#5b667f'], boot: ['#5a3a22', '#44291a'], belt: '#6b431f', head: 'helm', metal: STEEL, plume: ['#f6f2e6', '#c4bcab'], gear: 'sword' },
+  larkbow: { skin: SKIN.tan, hair: ['#6a4226', '#4d2f1a'], cloth: ['#e0b02e', '#b08420', '#f6d266'], legs: ['#8a6a44', '#6a4f30'], boot: ['#5a3a22', '#44291a'], belt: '#44291a', head: 'hood', gear: 'bow' },
+  dame:    { skin: SKIN.light, hair: ['#e8e2d2', '#bdb6a4'], cloth: ['#e0b02e', '#b08420', '#f6d266'], sleeve: [STEEL[0], STEEL[1]], legs: ['#7c88a3', '#5b667f'], boot: ['#5a3a22', '#44291a'], belt: '#6b431f', head: 'helm', metal: STEEL, plume: ['#ffffff', '#cfd6e6'], bigplume: true, cape: ['#f1ede2', '#c4bcab'], gear: 'lance' },
+  ansel:   { skin: SKIN.pale, hair: ['#eeeae0', '#c4bfb2'], cloth: ['#8f93a8', '#6a6e84', '#b5b9cc'], robe: true, trim: '#eeeae0', belt: '#55506a', head: 'elder', gear: 'bell', bigbell: true },
+  bram:    { skin: SKIN.light, hair: ['#8a5a2b', '#6b431f'], cloth: ['#b98c56', '#8f6a3c', '#d6ad78'], legs: ['#5a4a3c', '#40342a'], boot: ['#3a2a22', '#2a1d18'], belt: '#40342a', head: 'hair', apron: true, gear: 'none' },
   captain: { skin: SKIN.pale, hair: ['#35303b', '#221f27'], cloth: ['#46414f', '#2e2a36', '#676172'], sleeve: [IRON[0], IRON[1]], legs: ['#46414f', '#2e2a36'], boot: ['#2a1d18', '#1c1310'], belt: GOLD[1], head: 'horned', metal: IRON, cape: ['#d23b30', '#8f2222'], gear: 'great' },
 };
 function drawFigure(type, back) {
@@ -44,21 +52,24 @@ function drawFigure(type, back) {
   if (type === 'mage' && !back) P.r(11, 21, 2, 5, GOLD[0]);
   if (type === 'raider' && !back) P.r(10, 20, 4, 3, S[0]).r(13, 20, 1, 3, S[1]);
   if (type === 'bowman' && !back) P.r(9, 22, 6, 1, '#221f27');
+  if (K.apron && !back) P.r(9, 22, 6, 8, '#f1ede2').r(13, 22, 2, 8, '#c4bcab');
   // arms and hands
   P.r(6, 21, 2, 6, sl[0]).r(16, 21, 2, 6, sl[1]).r(6, 27, 2, 2, S[0]).r(16, 27, 2, 2, S[1]);
   if (m) P.e(7, 21, 2.3, 1.9, m[0]).e(17, 21, 2.3, 1.9, m[1]).p(6, 20, m[2]);
   if (K.cape && back) P.r(6, 20, 12, 14, K.cape[0]).r(14, 20, 4, 14, K.cape[1]).r(7, 20, 1, 13, '#f06a5a');
   if (back && (type === 'archer' || type === 'bowman')) P.r(10, 19, 4, 9, WOOD[0]).r(13, 19, 1, 9, WOOD[1]).pts([[10, 17], [11, 16], [12, 17], [13, 16]], '#f2efe6').pts([[10, 18], [11, 18], [12, 18], [13, 18]], '#d23b30');
+  if (K.scarf) { P.r(7, 19, 10, 2, K.scarf[0]).r(14, 19, 3, 2, K.scarf[1]); if (back) P.r(9, 21, 2, 6, K.scarf[0]).r(10, 21, 1, 6, K.scarf[1]); else P.r(15, 21, 2, 5, K.scarf[1]); }
   // head
   P.e(12, 14, 6, 6, S[1]).e(11.4, 13.6, 5.3, 5.5, S[0]);
   if (!back) { P.r(8, 15, 1, 2, EYE).r(13, 15, 1, 2, EYE).p(8, 14, '#fff').p(13, 14, '#fff').r(10, 18, 2, 1, S[1]); }
   // hair and headgear
   if (K.head === 'helm') {
     if (back) cap(m[0], m[1], 7, 19); else { cap(m[0], m[1], 7, 12); P.r(6, 12, 13, 1, m[1]).r(6, 13, 1, 4, m[0]).r(18, 13, 1, 4, m[1]).r(11, 13, 1, 2, m[1]); }
-    P.r(8, 9, 3, 1, m[2]).r(11, 3, 3, 4, K.plume[0]).r(13, 4, 3, 4, K.plume[1]).r(15, 6, 2, 3, K.plume[1]).p(11, 3, '#ff8a80');
+    P.r(8, 9, 3, 1, m[2]).r(11, 3, 3, 4, K.plume[0]).r(13, 4, 3, 4, K.plume[1]).r(15, 6, 2, 3, K.plume[1]).p(11, 3, K.bigplume ? '#ffffff' : '#ff8a80');
+    if (K.bigplume) P.r(10, 1, 4, 3, K.plume[0]).r(14, 2, 4, 4, K.plume[1]).r(17, 5, 2, 6, K.plume[1]).r(18, 10, 1, 3, K.plume[0]);
   } else if (K.head === 'hood' || K.head === 'mask') {
     if (back) { cap(cl[0], cl[1], 6, 20, 1); P.r(13, 19, 3, 3, cl[1]); }
-    else { cap(cl[0], cl[1], 6, 12, 1); P.r(5, 12, 2, 8, cl[0]).r(17, 12, 2, 8, cl[1]).r(8, 12, 6, 1, h[0]).r(13, 12, 3, 1, h[1]); if (K.head === 'mask') P.r(7, 17, 10, 3, '#2a2228').r(14, 17, 3, 3, '#1c161b'); }
+    else { cap(cl[0], cl[1], 6, 12, 1); P.r(5, 12, 2, 8, cl[0]).r(17, 12, 2, 8, cl[1]); if (!K.plain) P.r(8, 12, 6, 1, h[0]).r(13, 12, 3, 1, h[1]); else P.r(7, 12, 10, 1, cl[1]); if (K.head === 'mask') P.r(7, 17, 10, 3, '#2a2228').r(14, 17, 3, 3, '#1c161b'); }
     P.r(14, 5, 3, 2, cl[1]).r(16, 6, 2, 2, cl[1]);
   } else if (K.head === 'hat') {
     if (back) P.r(7, 12, 10, 9, h[0]).r(14, 12, 3, 9, h[1]).r(8, 21, 8, 2, h[0]); else P.r(6, 12, 1, 8, h[0]).r(17, 12, 2, 8, h[1]).r(7, 12, 3, 1, h[0]);
@@ -70,6 +81,11 @@ function drawFigure(type, back) {
   } else if (K.head === 'bandana') {
     if (back) cap(h[0], h[1], 7, 19); else { cap(h[0], h[1], 7, 11); P.r(6, 12, 1, 3, h[0]).r(18, 12, 1, 3, h[1]).r(8, 19, 6, 1, S[1]); }
     P.r(6, 10, 13, 2, K.accent[0]).r(15, 10, 4, 2, K.accent[1]).r(19, 11, 2, 2, K.accent[0]).r(20, 13, 1, 3, K.accent[1]);
+  } else if (K.head === 'hair') {
+    if (back) cap(h[0], h[1], 7, 19); else { cap(h[0], h[1], 7, 11); P.r(6, 12, 1, 3, h[0]).r(18, 12, 1, 3, h[1]).r(7, 12, 4, 1, h[0]).r(14, 12, 2, 1, h[1]); }
+    P.r(9, 6, 2, 1, h[0]).r(13, 6, 2, 1, h[1]);
+  } else if (K.head === 'elder') {
+    P.r(5, 12, 2, 6, h[0]).r(17, 12, 2, 6, h[1]); if (back) P.r(6, 14, 12, 6, h[0]).r(14, 14, 4, 6, h[1]); else P.r(8, 18, 8, 2, h[0]).r(9, 20, 6, 3, h[0]).r(13, 18, 3, 5, h[1]).r(10, 23, 4, 1, h[1]);
   } else if (K.head === 'horned') {
     if (back) cap(m[0], m[1], 7, 19); else { cap(m[0], m[1], 7, 12); P.r(6, 12, 13, 1, m[1]).r(6, 13, 1, 5, m[0]).r(18, 13, 1, 5, m[1]).r(11, 13, 2, 3, m[1]); P.p(8, 15, '#ff5a4a').p(13, 15, '#ff5a4a'); }
     for (const mm of [false, true]) { P.mirror(mm).pts([[5, 10], [4, 9], [4, 8], [3, 8], [3, 7], [3, 6], [4, 5], [4, 6]], '#efe6cf').pts([[5, 9], [4, 7]], '#cdbf9f'); } P.mirror(false);
@@ -82,6 +98,10 @@ function drawFigure(type, back) {
   else if (K.gear === 'staff') { P.r(4, 11, 1, 24, WOOD[0]).e(4, 8, 2.2, 2.2, '#ff9a2e').p(3, 7, '#fff2c0').p(4, 8, '#ffd27a'); }
   else if (K.gear === 'mace') { P.r(4, 18, 1, 11, WOOD[0]).r(3, 13, 3, 5, GOLD[0]).r(5, 13, 1, 5, GOLD[1]).p(2, 15, GOLD[0]).p(6, 15, GOLD[1]).p(4, 12, GOLD[0]); }
   else if (K.gear === 'axe') { P.r(5, 13, 1, 17, WOOD[0]).r(2, 13, 3, 6, STEEL[0]).r(2, 14, 1, 4, STEEL[2]).r(1, 15, 1, 2, STEEL[0]).r(4, 13, 1, 6, STEEL[1]); }
+  else if (K.gear === 'dagger') { P.r(5, 21, 1, 6, STEEL[0]).p(5, 20, STEEL[2]).r(4, 27, 3, 1, GOLD[0]); }
+  else if (K.gear === 'halberd') { P.r(4, 5, 1, 30, WOOD[0]).r(1, 6, 3, 6, STEEL[0]).r(1, 7, 1, 4, STEEL[2]).r(5, 7, 2, 3, STEEL[1]).p(4, 4, STEEL[0]).p(4, 3, STEEL[2]); }
+  else if (K.gear === 'bell') { const y = K.bigbell ? 5 : 9; P.r(4, y + 4, 1, 30 - y, WOOD[0]).r(2, y, 5, 1, WOOD[1]).r(K.bigbell ? 1 : 2, y + 1, K.bigbell ? 7 : 5, K.bigbell ? 5 : 4, GOLD[0]).r(K.bigbell ? 6 : 5, y + 1, 2, K.bigbell ? 5 : 4, GOLD[1]).p(3, y + 2, '#fff2c0').p(4, y + (K.bigbell ? 6 : 5), '#6a4226'); }
+  else if (K.gear === 'lance') { P.r(4, 2, 1, 32, WOOD[0]).r(3, 0, 3, 5, STEEL[0]).p(4, 0, STEEL[2]).r(3, 5, 3, 1, GOLD[0]).r(5, 6, 3, 3, K.cloth[0]).r(6, 9, 2, 1, K.cloth[1]); }
   else if (K.gear === 'great') { P.r(3, 7, 3, 19, IRON[2]).r(5, 7, 1, 19, IRON[0]).r(3, 7, 1, 19, '#ffffff').p(4, 6, IRON[2]).r(1, 26, 7, 1, GOLD[0]).r(3, 27, 3, 2, WOOD[1]); }
   P.mirror(false);
   outlinePx(P.c, OUTL);
@@ -97,6 +117,25 @@ function drawTree(seed) {
   const P = PX(28, 40), r = mulberry(seed); P.r(12, 28, 4, 11, WOOD[0]).r(14, 28, 2, 11, WOOD[1]).r(11, 37, 6, 2, WOOD[1]);
   P.e(14, 16, 11, 12, '#1f5a2e').e(12.5, 14.5, 9.5, 10.5, '#2f7a3a').e(10.5, 11.5, 6, 6, '#47994a').e(9, 9.5, 3, 2.6, '#6ab85a');
   for (let i = 0; i < 26; i++) { const x = 4 + Math.floor(r() * 20), y = 5 + Math.floor(r() * 22); if (P.g.getImageData(x, y, 1, 1).data[3]) P.p(x, y, r() < 0.5 ? '#1f5a2e' : '#6ab85a'); }
+  outlinePx(P.c, OUTL); return P.c;
+}
+function drawHouse(seed) {
+  const P = PX(44, 46), roof = seed % 2 ? ['#b5533c', '#8f3d2c', '#d0705a'] : ['#7a6a9a', '#5a4d78', '#9a8aba'];
+  P.r(7, 22, 30, 21, '#e9dcc0').r(27, 22, 10, 21, '#cdbf9f').r(7, 22, 30, 1, '#6a4226').r(7, 31, 30, 1, '#6a4226').r(7, 22, 1, 21, '#6a4226').r(36, 22, 1, 21, '#6a4226').r(21, 22, 1, 21, '#6a4226');
+  P.r(11, 33, 7, 10, '#6a4226').r(12, 34, 5, 9, '#8a5a34').p(16, 39, GOLD[0]).r(26, 25, 6, 5, '#2b3a66').r(27, 26, 4, 3, '#ffd88a').r(29, 25, 1, 5, '#6a4226').r(7, 42, 30, 2, '#8d8c9a');
+  for (let y = 4; y <= 22; y++) { const w = 16 + (y - 4) * 1.4, x0 = Math.round(22 - w / 2); P.r(x0, y, Math.round(w), 1, y % 3 === 0 ? roof[1] : roof[0]).r(x0 + Math.round(w * 0.68), y, Math.round(w * 0.32), 1, roof[1]).p(x0 + 1, y, roof[2]); }
+  P.r(28, 2, 4, 7, '#8d8c9a').r(30, 2, 2, 7, '#6b6a78');
+  outlinePx(P.c, OUTL); return P.c;
+}
+function drawBell() {
+  const P = PX(30, 44); P.r(4, 6, 3, 37, WOOD[0]).r(6, 6, 1, 37, WOOD[1]).r(23, 6, 3, 37, WOOD[0]).r(25, 6, 1, 37, WOOD[1]).r(2, 4, 26, 4, WOOD[0]).r(2, 7, 26, 1, WOOD[1]).r(3, 41, 5, 2, '#8d8c9a').r(22, 41, 5, 2, '#8d8c9a');
+  P.r(14, 8, 2, 4, '#5a5966').e(15, 19, 6.5, 7.5, GOLD[1]).e(14.4, 18.6, 5.6, 6.8, GOLD[0]).r(8, 24, 15, 3, GOLD[0]).r(18, 24, 5, 3, GOLD[1]).r(10, 14, 2, 7, '#fff2c0').r(14, 27, 3, 3, '#5a5966');
+  outlinePx(P.c, OUTL); return P.c;
+}
+function drawPillar() { const P = PX(18, 40); P.r(4, 6, 10, 30, '#a3a2af').r(10, 6, 4, 30, '#7c7b88').r(5, 6, 1, 30, '#c4c3ce').r(2, 2, 14, 4, '#b3b2c0').r(11, 2, 5, 4, '#8d8c9a').r(2, 36, 14, 3, '#8d8c9a'); for (let y = 12; y < 36; y += 8) P.r(4, y, 10, 1, '#7c7b88'); outlinePx(P.c, OUTL); return P.c; }
+function drawTable() {
+  const P = PX(34, 24); P.r(4, 14, 3, 9, WOOD[1]).r(27, 14, 3, 9, WOOD[1]).r(1, 6, 32, 9, '#f1ede2').r(1, 13, 32, 2, '#c4bcab').r(1, 9, 32, 2, '#c8372d').r(1, 6, 32, 1, '#ffffff');
+  P.e(8, 6, 3, 1.6, '#e0b02e').e(17, 5.5, 4, 2, '#b5533c').r(15, 2, 4, 3, '#f6e9c8').e(26, 6, 3, 1.6, '#4f9a4a').r(11, 3, 1, 4, '#7da2f5').r(22, 3, 1, 4, '#7da2f5').p(17, 1, '#ffd24a');
   outlinePx(P.c, OUTL); return P.c;
 }
 function drawRock() { const P = PX(24, 20); P.e(11, 12, 9, 6.5, '#6b6a78').e(10, 11, 8, 5.5, '#8d8c9a').e(8, 9, 4, 2.5, '#b3b2c0').e(18, 15, 4, 3.5, '#6b6a78').e(17.5, 14.5, 3, 2.6, '#8d8c9a').pts([[12, 12], [13, 13], [14, 13], [9, 14]], '#5a5966'); outlinePx(P.c, OUTL); return P.c; }
@@ -127,3 +166,4 @@ function tileSide(kind, rows, seed) { // a cliff face `rows` texels tall, turf a
   const g = P.g; for (let y = 0; y < rows; y++) { const k = Math.pow(y / rows, 1.6) * 0.82; if (k > 0.02) { g.fillStyle = `rgba(10,12,34,${k.toFixed(3)})`; g.fillRect(0, y, 16, 1); } }
   return P.c;
 }
+KIT.corvin = KIT.captain; KIT.isolde = KIT.dame;

@@ -1,43 +1,87 @@
-/* ===== data: the map, the Boxwood Company, the Crow Banner ===== */
-const W = 8, H = 8;
-const HEIGHTS = [
-  [2, 2, 1, 1, 1, 2, 3, 3],
-  [1, 1, 1, 1, 1, 1, 2, 3],
-  [1, 0, 0, 1, 0, 0, 1, 1],
-  [0, 0, 0, 1, 0, 0, 0, 0],
-  [0, 0, 0, 1, 0, 0, 0, 1],
-  [1, 1, 0, 1, 0, 0, 1, 1],
-  [2, 2, 1, 1, 0, 1, 1, 2],
-  [2, 2, 1, 1, 1, 1, 2, 2],
-];
-// g grass, d dirt road, s stone, w water (impassable), b bridge, f ford (shallow, passable)
-const KINDS = ['gggdgsss', 'gggdggss', 'gggdgggg', 'wwwbwwfw', 'gggdgggg', 'gggdgggg', 'gggdgggg', 'gggdgggg'];
-const PROPS = { '0,4': 'tree', '1,2': 'tree', '5,5': 'tree', '7,2': 'rock', '5,0': 'tree' };
-
+/* ===== data: abilities, the company, their opponents, and the five maps ===== */
 const AB = {
-  sword:    { name: 'Sword', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 10, anim: 'melee', info: 'Adjacent · 10 damage' },
-  cleave:   { name: 'Cleave', kind: 'hit', shape: 'ring', melee: true, rmin: 0, rmax: 0, power: 8, cd: 1, anim: 'spin', info: 'Every adjacent enemy · 8' },
-  shoot:    { name: 'Shoot', kind: 'hit', shape: 'single', rmin: 2, rmax: 5, power: 8, anim: 'arrow', info: 'Range 2–5 · 8 damage' },
-  power:    { name: 'Power Shot', kind: 'hit', shape: 'single', rmin: 2, rmax: 5, power: 14, cd: 2, anim: 'arrow', info: 'Range 2–5 · 14 damage' },
-  spark:    { name: 'Spark', kind: 'hit', shape: 'single', rmin: 1, rmax: 3, power: 7, anim: 'spark', info: 'Range 1–3 · 7 damage' },
-  fireball: { name: 'Fireball', kind: 'hit', shape: 'cross', rmin: 2, rmax: 4, power: 9, cd: 2, anim: 'fireball', info: 'Range 2–4 · 9 in a plus shape' },
-  mace:     { name: 'Mace', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 6, anim: 'melee', info: 'Adjacent · 6 damage' },
-  mend:     { name: 'Mend', kind: 'heal', shape: 'single', rmin: 0, rmax: 3, power: 12, cd: 1, anim: 'heal', info: 'Range 0–3 · restore 12 HP' },
-  axe:      { name: 'Axe', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 7, anim: 'melee', info: 'Adjacent · 7 damage' },
-  bow:      { name: 'Shortbow', kind: 'hit', shape: 'single', rmin: 2, rmax: 4, power: 6, anim: 'arrow', info: 'Range 2–4 · 6 damage' },
-  great:    { name: 'Greatsword', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 11, anim: 'melee', info: 'Adjacent · 11 damage' },
+  // the Boxwood Company
+  sword:    { name: 'Sword', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 10, anim: 'melee', info: 'Adjacent · 10' },
+  cleave:   { name: 'Cleave', kind: 'hit', shape: 'ring', melee: true, rmin: 0, rmax: 0, power: 8, cd: 1, anim: 'spin', info: 'All adjacent · 8' },
+  bash:     { name: 'Shield Bash', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 6, push: 1, cd: 1, anim: 'melee', info: '6 · shoves back' },
+  shoot:    { name: 'Shoot', kind: 'hit', shape: 'single', rmin: 2, rmax: 5, power: 8, anim: 'arrow', info: 'Range 2-5 · 8' },
+  power:    { name: 'Power Shot', kind: 'hit', shape: 'single', rmin: 2, rmax: 5, power: 14, cd: 2, anim: 'arrow', info: 'Range 2-5 · 14' },
+  volley:   { name: 'Volley', kind: 'hit', shape: 'cross', rmin: 2, rmax: 5, power: 6, cd: 2, anim: 'arrow', info: 'Plus shape · 6' },
+  spark:    { name: 'Spark', kind: 'hit', shape: 'single', rmin: 1, rmax: 3, power: 7, anim: 'spark', info: 'Range 1-3 · 7' },
+  fireball: { name: 'Fireball', kind: 'hit', shape: 'cross', rmin: 2, rmax: 4, power: 9, cd: 2, anim: 'fireball', info: 'Plus shape · 9' },
+  frost:    { name: 'Frost', kind: 'hit', shape: 'single', rmin: 2, rmax: 4, power: 8, still: true, cd: 2, anim: 'frost', info: '8 · stills' },
+  mace:     { name: 'Mace', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 6, anim: 'melee', info: 'Adjacent · 6' },
+  mend:     { name: 'Mend', kind: 'heal', shape: 'single', rmin: 0, rmax: 3, power: 12, cd: 1, anim: 'heal', info: 'Heal 12' },
+  bless:    { name: 'Bless', kind: 'heal', shape: 'aura', radius: 2, rmin: 0, rmax: 0, power: 7, cd: 2, anim: 'bless', info: 'Heal 7 nearby' },
+  dagger:   { name: 'Dagger', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 7, anim: 'melee', info: 'Adjacent · 7' },
+  hamstring:{ name: 'Hamstring', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 5, still: true, cd: 1, anim: 'melee', info: '5 · stills' },
+  step:     { name: 'Shadowstep', kind: 'hit', shape: 'single', melee: true, step: true, rmin: 1, rmax: 3, power: 8, cd: 2, anim: 'step', info: 'From behind · 8' },
+  // guests
+  great:    { name: 'Greatsword', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 11, anim: 'melee', info: 'Adjacent · 11' },
+  lance:    { name: 'Lance', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 2, power: 13, anim: 'melee', info: 'Reach 2 · 13' },
+  // opponents
+  axe:      { name: 'Axe', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 7, anim: 'melee', info: 'Adjacent · 7' },
+  bow:      { name: 'Shortbow', kind: 'hit', shape: 'single', rmin: 2, rmax: 4, power: 6, anim: 'arrow', info: 'Range 2-4 · 6' },
+  halberd:  { name: 'Halberd', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 9, anim: 'melee', info: 'Adjacent · 9' },
+  chime:    { name: 'Chime', kind: 'hit', shape: 'single', rmin: 2, rmax: 4, power: 7, anim: 'chime', info: 'Range 2-4 · 7' },
+  hush:     { name: 'Hush', kind: 'hit', shape: 'single', rmin: 2, rmax: 4, power: 4, still: true, cd: 2, anim: 'chime', info: 'Range 2-4 · 4 · stills' },
+  blade:    { name: 'Blunted Blade', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 11, anim: 'melee', info: 'Adjacent · 11' },
+  larkbow:  { name: 'Longbow', kind: 'hit', shape: 'single', rmin: 2, rmax: 5, power: 8, anim: 'arrow', info: 'Range 2-5 · 8' },
+  staff:    { name: 'Bell Staff', kind: 'hit', shape: 'single', melee: true, rmin: 1, rmax: 1, power: 13, anim: 'melee', info: 'Adjacent · 13' },
+  toll:     { name: 'Great Toll', kind: 'hit', shape: 'aura', radius: 2, rmin: 0, rmax: 0, power: 8, still: true, cd: 2, anim: 'toll', info: 'Foes within 2 · 8 · stills' },
 };
 const TYPES = {
-  knight:  { name: 'Rowan', cls: 'Knight', team: 'crew', hp: 40, move: 4, jump: 2, speed: 7, ab: ['sword', 'cleave'], blurb: 'Holds the line. Hits hard up close.' },
-  archer:  { name: 'Wren',  cls: 'Archer', team: 'crew', hp: 26, move: 4, jump: 3, speed: 9, ab: ['shoot', 'power'], blurb: 'Long reach. Deadlier from high ground.' },
-  mage:    { name: 'Ember', cls: 'Mage',   team: 'crew', hp: 22, move: 3, jump: 2, speed: 8, ab: ['spark', 'fireball'], blurb: 'Fragile. Burns several enemies at once.' },
-  cleric:  { name: 'Hale',  cls: 'Cleric', team: 'crew', hp: 28, move: 4, jump: 2, speed: 8, ab: ['mace', 'mend'], blurb: 'Keeps everyone standing.' },
-  raider:  { name: 'Raider',  cls: 'Crow Banner footman', team: 'foe', hp: 20, move: 4, jump: 2, speed: 8, ab: ['axe'] },
-  bowman:  { name: 'Bowman',  cls: 'Crow Banner archer',  team: 'foe', hp: 14, move: 3, jump: 2, speed: 7, ab: ['bow'] },
-  captain: { name: 'Captain', cls: 'Crow Banner captain', team: 'foe', hp: 40, move: 3, jump: 2, speed: 6, ab: ['great'], boss: true },
+  knight:  { name: 'Rowan', cls: 'Knight', team: 'crew', hp: 40, grow: 6, move: 4, jump: 2, speed: 7, ab: ['sword', 'cleave'], learn: 'bash', blurb: 'Holds the line.' },
+  archer:  { name: 'Wren',  cls: 'Archer', team: 'crew', hp: 26, grow: 4, move: 4, jump: 3, speed: 9, ab: ['shoot', 'power'], learn: 'volley', blurb: 'Loves high ground.' },
+  mage:    { name: 'Ember', cls: 'Mage',   team: 'crew', hp: 22, grow: 3, move: 3, jump: 2, speed: 8, ab: ['spark', 'fireball'], learn: 'frost', blurb: 'Burns groups.' },
+  cleric:  { name: 'Hale',  cls: 'Cleric', team: 'crew', hp: 28, grow: 4, move: 4, jump: 2, speed: 8, ab: ['mace', 'mend'], learn: 'bless', blurb: 'Keeps all standing.' },
+  scout:   { name: 'Tam',   cls: 'Scout',  team: 'crew', hp: 26, grow: 4, move: 5, jump: 3, speed: 11, ab: ['dagger', 'hamstring'], learn: 'step', backMult: 2, blurb: 'Double from behind.' },
+  corvin:  { name: 'Corvin', cls: 'Crow captain', team: 'crew', hp: 44, move: 4, jump: 2, speed: 7, ab: ['great'], guest: true, blurb: 'Came after all.' },
+  isolde:  { name: 'Isolde', cls: 'Dame of the Larks', team: 'crew', hp: 46, move: 4, jump: 2, speed: 8, ab: ['lance'], guest: true, blurb: 'Came after all.' },
+  raider:  { name: 'Raider',  cls: 'Crow Banner', team: 'foe', hp: 20, move: 4, jump: 2, speed: 8, ab: ['axe'] },
+  bowman:  { name: 'Bowman',  cls: 'Crow Banner', team: 'foe', hp: 14, move: 3, jump: 2, speed: 7, ab: ['bow'] },
+  captain: { name: 'Corvin',  cls: 'Crow captain', team: 'foe', hp: 40, move: 3, jump: 2, speed: 6, ab: ['great'], boss: true },
+  warden:  { name: 'Warden',  cls: 'Even Hour', team: 'foe', hp: 28, move: 3, jump: 2, speed: 7, ab: ['halberd'] },
+  chimer:  { name: 'Chimer',  cls: 'Even Hour', team: 'foe', hp: 18, move: 3, jump: 2, speed: 8, ab: ['chime', 'hush'] },
+  larkblade: { name: 'Lark Blade', cls: 'Brass Larks', team: 'foe', hp: 34, move: 4, jump: 2, speed: 8, ab: ['blade'] },
+  larkbow: { name: 'Lark Bow', cls: 'Brass Larks', team: 'foe', hp: 22, move: 3, jump: 3, speed: 8, ab: ['larkbow'] },
+  dame:    { name: 'Isolde',  cls: 'Dame of the Larks', team: 'foe', hp: 60, move: 4, jump: 2, speed: 8, ab: ['lance'], boss: true },
+  ansel:   { name: 'Ansel',   cls: 'Brother of the Even Hour', team: 'foe', hp: 90, move: 3, jump: 2, speed: 7, ab: ['staff', 'toll'], boss: true },
 };
-const START = {
-  crew: [['knight', 3, 5], ['archer', 1, 6], ['mage', 4, 5], ['cleric', 3, 6]],
-  foes: [['raider', 2, 1], ['raider', 4, 1], ['raider', 5, 2], ['bowman', 6, 1], ['captain', 3, 0]],
-};
-const TOTAL_FOES = START.foes.length, PAR_TURNS = 14;
+// g grass, d dirt road, s stone, w water (impassable), b bridge, f ford (shallow, passable)
+const LEVELS = [
+  { name: 'Alder Ford', goal: 'Rout the Crow Banner.', par: 14,
+    h: [[2, 2, 1, 1, 1, 2, 3, 3], [1, 1, 1, 1, 1, 1, 2, 3], [1, 0, 0, 1, 0, 0, 1, 1], [0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 0, 1, 0, 0, 1, 1], [2, 2, 1, 1, 0, 1, 1, 2], [2, 2, 1, 1, 1, 1, 2, 2]],
+    k: ['gggdgsss', 'gggdggss', 'gggdgggg', 'wwwbwwfw', 'gggdgggg', 'gggdgggg', 'gggdgggg', 'gggdgggg'],
+    props: { '0,4': 'tree', '1,2': 'tree', '5,5': 'tree', '7,2': 'rock', '5,0': 'tree' },
+    crew: [['knight', 3, 5], ['archer', 1, 6], ['mage', 4, 5], ['cleric', 3, 6]],
+    foes: [['raider', 2, 1], ['raider', 4, 1], ['raider', 5, 2], ['bowman', 6, 1], ['captain', 3, 0]] },
+  { name: 'Hollowmere', goal: 'Drive the wardens from the dusk bell.', par: 14,
+    h: [[2, 2, 1, 1, 1, 1, 1, 0], [2, 1, 1, 1, 1, 1, 0, 0], [1, 1, 0, 0, 1, 1, 0, 0], [1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 1, 1], [0, 1, 1, 0, 0, 1, 1, 1], [0, 1, 1, 0, 0, 1, 1, 2]],
+    k: ['gggssggw', 'gggssgww', 'gggdggww', 'gggdgggw', 'ggdddggg', 'gggdgggg', 'gggdgggg', 'gggdgggg'],
+    props: { '4,0': 'bell', '1,3': 'house', '6,4': 'house', '0,6': 'tree', '7,5': 'tree', '0,1': 'tree' }, extras: [['bram', 4, 4, 1], ['scout', 0, 4, 0]],
+    crew: [['knight', 3, 6], ['archer', 2, 6], ['mage', 4, 6], ['cleric', 3, 7]],
+    foes: [['warden', 3, 1], ['warden', 2, 2], ['warden', 5, 2], ['chimer', 4, 1], ['chimer', 1, 1]] },
+  { name: 'Larkspur Rise', goal: 'Best Dame Isolde in the bout.', par: 15, win: 'boss',
+    h: [[1, 1, 2, 2, 2, 2, 1, 1], [1, 2, 2, 3, 3, 2, 2, 1], [0, 1, 2, 3, 3, 2, 1, 0], [0, 1, 1, 2, 2, 1, 1, 0], [0, 0, 1, 1, 1, 1, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 1, 1]],
+    k: ['gggggggg', 'gggggggg', 'gggddggg', 'gggddggg', 'gggddggg', 'gggddggg', 'gggddggg', 'gggddggg'],
+    props: { '0,2': 'tree', '7,3': 'rock', '6,5': 'tree', '1,5': 'rock', '7,0': 'tree' },
+    crew: [['knight', 3, 6], ['archer', 0, 6], ['mage', 4, 7], ['cleric', 3, 7], ['scout', 5, 6]],
+    foes: [['dame', 3, 1], ['larkblade', 2, 3], ['larkblade', 5, 3], ['larkbow', 4, 1], ['larkbow', 2, 1]] },
+  { name: 'The Vesper Stair', goal: 'Climb the stair.', par: 18,
+    h: [[3, 3, 3, 3, 3, 3, 3, 3], [2, 3, 3, 3, 3, 3, 3, 2], [2, 2, 2, 3, 3, 2, 2, 2], [1, 2, 2, 2, 2, 2, 2, 1], [1, 1, 1, 2, 2, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 0], [0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]],
+    k: ['ssssssss', 'ssssssss', 'ssssssss', 'ssssssss', 'ssssssss', 'gssssssg', 'gggssggg', 'gggddggg'],
+    props: { '0,0': 'pillar', '7,0': 'pillar', '1,3': 'pillar', '6,3': 'pillar', '0,7': 'tree', '7,6': 'tree' },
+    crew: [['knight', 3, 6], ['archer', 1, 7], ['mage', 4, 7], ['cleric', 3, 7], ['scout', 5, 6]],
+    foes: [['warden', 2, 3, 2], ['warden', 5, 3, 2], ['warden', 3, 2, 2], ['chimer', 1, 1, 2], ['chimer', 6, 1, 2], ['chimer', 4, 0, 2]] },
+  { name: 'The Even Bell', goal: 'Bring Brother Ansel down from the bell.', par: 27, win: 'boss',
+    h: [[2, 2, 2, 3, 3, 2, 2, 2], [2, 1, 2, 3, 3, 2, 1, 2], [1, 1, 2, 2, 2, 2, 1, 1], [1, 0, 1, 1, 1, 1, 0, 1], [0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 1, 1]],
+    k: ['ssssssss', 'ssssssss', 'ssssssss', 'swsssswg', 'ssssssss', 'ggsddsgg', 'gggddggg', 'gggddggg'],
+    props: { '3,0': 'bell', '0,0': 'pillar', '7,0': 'pillar', '0,7': 'tree', '7,7': 'tree' },
+    crew: [['knight', 3, 5], ['archer', 1, 6], ['mage', 4, 6], ['cleric', 3, 7], ['scout', 5, 5]],
+    foes: [['ansel', 4, 1, 3], ['warden', 2, 2, 3], ['warden', 5, 2, 3], ['warden', 3, 3, 3], ['warden', 4, 3, 3], ['chimer', 1, 1, 3], ['chimer', 6, 1, 3], ['chimer', 3, 1, 3]],
+    reinforce: { after: 5, units: [['corvin', 0, 5], ['isolde', 7, 5]] } },
+];
+const XP_LV = [0, 60, 150, 270, 420];
+const FIRSTS = { back: 'First strike from behind', high: 'First shot from high ground', multi: 'First time hitting several at once', still: 'First foe stilled', push: 'First foe knocked off a ledge', save: 'First rescue from the brink' };
+let W = 8, H = 8, HEIGHTS = LEVELS[0].h, KINDS = LEVELS[0].k, PROPS = LEVELS[0].props, LV = LEVELS[0];

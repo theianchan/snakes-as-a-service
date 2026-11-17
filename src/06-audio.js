@@ -54,6 +54,10 @@ const Snd = (() => {
     heal() { [76, 79, 84, 88].forEach((m, i) => tone({ f: mtof(m), t: i * 0.07, dur: 0.4, g: 0.11, echo: true })); },
     topple() { tone({ f: 420, f2: 60, dur: 0.4, g: 0.26, type: 'square', lp: 1400 }); noise({ t: 0.22, f: 300, dur: 0.12, g: 0.2, type: 'lowpass' }); },
     turn() { noise({ f: 700, f2: 1500, dur: 0.16, g: 0.1, q: 1.2 }); },
+    page() { noise({ f: 2600, f2: 900, dur: 0.22, g: 0.12, q: 0.6 }); },
+    bell() { [0, 7, 12].forEach((d, i) => tone({ f: mtof(69 + d), dur: 1.1, g: 0.12 - i * 0.03, echo: true })); tone({ f: mtof(69) * 2.76, dur: 0.5, g: 0.04 }); },
+    first() { [84, 88, 91, 96].forEach((m, i) => tone({ f: mtof(m), t: i * 0.05, dur: 0.22, g: 0.1, type: 'square', lp: 3000 })); },
+    horn() { [57, 64].forEach((m, i) => tone({ f: mtof(m), t: i * 0.22, dur: 0.6, g: 0.16, type: 'sawtooth', lp: 900, a: 0.05 })); },
     win() { [72, 76, 79, 84, 88, 91].forEach((m, i) => tone({ f: mtof(m), t: i * 0.12, dur: 0.6, g: 0.15, echo: true })); },
     lose() { [69, 65, 62, 57].forEach((m, i) => tone({ f: mtof(m), t: i * 0.24, dur: 0.8, g: 0.15, type: 'triangle', lp: 1200 })); },
   };

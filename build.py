@@ -3,7 +3,7 @@
 import pathlib
 root = pathlib.Path(__file__).parent
 src = root / "src"
-js = "\n".join((src / f).read_text() for f in ["01-data.js", "02-sim.js", "03-sprites.js", "06-audio.js", "04-scene.js", "05-ui.js"])
+js = "\n".join((src / f).read_text() for f in ["01-data.js", "07-story.js", "02-sim.js", "03-sprites.js", "06-audio.js", "04-scene.js", "05-ui.js"])
 out = f"""<title>Boxwood Tactics</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">

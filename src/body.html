@@ -21,8 +21,9 @@
     </div>
     <div id="hint" aria-live="polite"></div>
     <div class="row" id="actRow">
-      <button id="bAtk"><b></b><small></small></button>
-      <button id="bSkl"><b></b><small></small></button>
+      <button id="bAb0"><b></b><small></small></button>
+      <button id="bAb1"><b></b><small></small></button>
+      <button id="bAb2" hidden><b></b><small></small></button>
       <button id="bUndo" class="minor"><b>Undo move</b></button>
       <button id="bEnd" class="minor"><b>End turn</b></button>
     </div>
@@ -32,20 +33,50 @@
     </div>
   </section>
 
+  <div id="toast" aria-live="polite"></div>
+
+  <section id="talk" class="win" hidden aria-live="polite">
+    <div id="talkPicBox"><img id="talkPic" alt=""></div>
+    <div id="talkName"></div>
+    <div id="talkText"></div>
+    <div id="talkFoot"><button id="talkSkip">Skip scene</button><span id="talkMore" hidden>&#9660;</span></div>
+  </section>
+
   <div class="overlay gutter" id="intro">
     <div class="titleblock">
-      <div class="eyebrow">Chapter 1 · Alder Ford</div>
+      <div class="eyebrow">A tactics story in five chapters</div>
       <h1>Boxwood Tactics</h1>
     </div>
     <div class="sheet win">
-      <p>The Crow Banner holds the far bank. Rout all five of them.</p>
+      <p>Maren Boxwood left her company a letter, a guest list, and one last job: lay a long table at the ford and invite everyone.</p>
+      <button class="go" id="startBtn"><b>Begin</b></button>
+      <button class="go" id="newBtn" hidden><b>Start over</b></button>
+    </div>
+  </div>
+
+  <div class="overlay gutter" id="help" hidden>
+    <div class="sheet win">
+      <div class="eyebrow">How to play</div>
       <ul class="tips">
         <li>Each unit may <b>move</b> and <b>act</b> once per turn, in either order.</li>
         <li><b>High ground</b> adds damage to arrows and spells.</li>
         <li>A blow <b>from behind</b> deals half again as much.</li>
-        <li>Swipe sideways to turn the map.</li>
+        <li>A <b>stilled</b> unit cannot move on its next turn.</li>
+        <li>Doing something for the <b>first time</b> earns extra experience.</li>
+        <li>Swipe sideways to turn the map. Tap anyone to size them up.</li>
       </ul>
-      <button class="go" id="startBtn"><b>Begin</b></button>
+      <button class="go" id="helpBtn"><b>Back</b></button>
+    </div>
+  </div>
+
+  <div class="overlay gutter" id="camp" hidden>
+    <div class="sheet win">
+      <div class="eyebrow" id="campEyebrow"></div>
+      <div id="campStars"></div>
+      <div id="campRoster"></div>
+      <div id="campFirsts"></div>
+      <div id="campGuests"></div>
+      <button class="go" id="campBtn"><b></b></button>
     </div>
   </div>
 
@@ -53,10 +84,19 @@
     <div class="sheet win">
       <div class="eyebrow" id="outroEyebrow"></div>
       <h2 id="outroTitle"></h2>
-      <div id="stars" aria-hidden="true"></div>
       <p id="outroText"></p>
-      <div id="stats"></div>
-      <button class="go" id="againBtn"><b>Play again</b></button>
+      <div id="outroRoster"></div>
+      <button class="go" id="againBtn"><b>Try again</b></button>
+    </div>
+  </div>
+
+  <div class="overlay gutter" id="finale" hidden>
+    <div class="sheet win">
+      <div class="eyebrow">The year, in firsts</div>
+      <h2><span id="finaleCount"></span> firsts</h2>
+      <p>The days that did not match are the ones the company can still find.</p>
+      <ul id="finaleList"></ul>
+      <button class="go" id="finaleBtn"><b>Back to the title</b></button>
     </div>
   </div>
 </div>
